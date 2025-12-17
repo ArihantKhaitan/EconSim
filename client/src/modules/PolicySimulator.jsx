@@ -3,6 +3,38 @@ import { formatCurrency } from '../utils/taxLogic';
 
 export default function PolicySimulator({ taxInputs, gstImpact, newRegimeTax }) {
   const [policySimulation, setPolicySimulation] = useState({ gstChange: 0, incomeTaxChange: 0, fuelTaxChange: 0 });
+  
+  // AI State
+  const [aiExplanation, setAiExplanation] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Function to call the backend
+  const getAIExplanation = async () => {
+    setLoading(true);
+    setAiExplanation('');
+    try {
+      const response = await fetch('http://localhost:5000/api/explain-impact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          income: taxInputs.grossIncome,
+          gstChange: policySimulation.gstChange,
+          taxChange: policySimulation.incomeTaxChange,
+          fuelChange: policySimulation.fuelTaxChange
+        })
+      });
+      
+      const data = await response.json();
+      if (data.explanation) {
+        setAiExplanation(data.explanation);
+      } else {
+        setAiExplanation("AI service is currently unavailable. Check server console.");
+      }
+    } catch (error) {
+      setAiExplanation("Error connecting to AI Server. Is 'node index.js' running?");
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="space-y-8">
@@ -50,6 +82,29 @@ export default function PolicySimulator({ taxInputs, gstImpact, newRegimeTax }) 
                   </div>
                </div>
             </div>
+
+            {/* AI BUTTON SECTION */}
+            <div className="pt-4 border-t border-slate-800">
+                <button 
+                  onClick={getAIExplanation}
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-900/20"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">🤖 Analyzing with Gemini AI...</span>
+                  ) : (
+                    <><span>✨</span> Ask AI to Explain Impact</>
+                  )}
+                </button>
+
+                {aiExplanation && (
+                  <div className="mt-4 p-5 bg-slate-800 rounded-xl border border-purple-500/30 shadow-inner">
+                    <h4 className="font-semibold text-purple-400 mb-2 text-sm uppercase tracking-wider">Gemini Analysis</h4>
+                    <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{aiExplanation}</p>
+                  </div>
+                )}
+            </div>
+
           </div>
         </div>
       </div>
