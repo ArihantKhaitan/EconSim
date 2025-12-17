@@ -1,0 +1,9 @@
+/* client/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #020617; /* Slate-950 */
+  color: white;
+}
