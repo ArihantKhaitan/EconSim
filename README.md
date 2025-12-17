@@ -66,7 +66,7 @@ node index.js
 ```bash
 cd ../client
 npm install
-npm run dev
+npx vite --port 5173 --host 
 
 ```
 
