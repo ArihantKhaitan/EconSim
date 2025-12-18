@@ -32,7 +32,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
 
       {/* CENTER: Spacious Tabs (Hidden on small screens) */}
       <div className="hidden md:flex gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/10">
-        {['dashboard', 'income-tax', 'gst', 'policy-sim', 'learn'].map((tab) => (
+        {['dashboard', 'income-tax', 'gst', 'policy-sim', 'inflation', 'learn'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}

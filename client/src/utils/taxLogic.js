@@ -26,16 +26,16 @@ export const GST_CATEGORIES = {
 };
 
 export const EXPENSE_ITEMS = [
-  { name: 'Groceries (Fresh)', category: 'exempt', avgMonthly: 4000, gst: 0 },
-  { name: 'Groceries (Packaged)', category: 'essential', avgMonthly: 5000, gst: 5 },
-  { name: 'Mobile & Internet', category: 'standard', avgMonthly: 1500, gst: 18 },
-  { name: 'Electricity', category: 'exempt', avgMonthly: 2000, gst: 0 },
-  { name: 'Dining Out', category: 'standard', avgMonthly: 3000, gst: 18 },
-  { name: 'Petrol/Diesel', category: 'exempt', avgMonthly: 5000, gst: 0 },
-  { name: 'Medicine', category: 'essential', avgMonthly: 1000, gst: 5 },
-  { name: 'Clothing', category: 'standard', avgMonthly: 2000, gst: 18 },
-  { name: 'Entertainment', category: 'standard', avgMonthly: 1000, gst: 18 },
-  { name: 'Insurance', category: 'standard', avgMonthly: 2000, gst: 18 },
+  { name: 'Groceries (Fresh)', category: 'exempt', amount: 4000, avgMonthly: 4000, gst: 0 },
+  { name: 'Groceries (Packaged)', category: 'essential', amount: 5000, avgMonthly: 5000, gst: 5 },
+  { name: 'Mobile & Internet', category: 'standard', amount: 1500, avgMonthly: 1500, gst: 18 },
+  { name: 'Electricity', category: 'exempt', amount: 2000, avgMonthly: 2000, gst: 0 },
+  { name: 'Dining Out', category: 'standard', amount: 3000, avgMonthly: 3000, gst: 18 },
+  { name: 'Petrol/Diesel', category: 'exempt', amount: 5000, avgMonthly: 5000, gst: 0 },
+  { name: 'Medicine', category: 'essential', amount: 1000, avgMonthly: 1000, gst: 5 },
+  { name: 'Clothing', category: 'standard', amount: 2000, avgMonthly: 2000, gst: 18 },
+  { name: 'Entertainment', category: 'standard', amount: 1000, avgMonthly: 1000, gst: 18 },
+  { name: 'Insurance', category: 'standard', amount: 2000, avgMonthly: 2000, gst: 18 },
 ];
 
 // ==================== FUNCTIONS ====================
@@ -63,6 +63,7 @@ export const calculateNewRegimeTax = (income, isSalaried = true) => {
     tax = Math.max(0, tax - rebate);
   }
   
+  // Marginal relief
   if (taxableIncome > 1200000 && taxableIncome <= 1275000) {
     const excessIncome = taxableIncome - 1200000;
     if (tax > excessIncome) tax = excessIncome;
@@ -74,7 +75,7 @@ export const calculateNewRegimeTax = (income, isSalaried = true) => {
   return { grossIncome: income, standardDeduction, taxableIncome, rebate, cess, totalTax, effectiveRate: income > 0 ? (totalTax / income) * 100 : 0, netIncome: income - totalTax };
 };
 
-export const calculateOldRegimeTax = (income, deductions, isSalaried = true) => {
+export const calculateOldRegimeTax = (income, deductions = {}, isSalaried = true) => {
   const standardDeduction = isSalaried ? 50000 : 0;
   const total80C = Math.min(deductions.section80C || 0, 150000);
   const total80D = Math.min(deductions.section80D || 0, 50000);
@@ -108,9 +109,28 @@ export const calculateOldRegimeTax = (income, deductions, isSalaried = true) => 
 export const calculateGSTImpact = (expenses) => {
   let totalGST = 0, totalExpense = 0;
   expenses.forEach(e => {
-    const gstAmount = e.amount - e.amount / (1 + e.gst / 100);
+    // Assuming 'amount' is inclusive of GST for user simplicity, so we back-calculate
+    // Formula: GST Part = Amount - (Amount / (1 + Rate/100))
+    const gstAmount = e.amount - (e.amount / (1 + e.gst / 100));
     totalGST += gstAmount;
     totalExpense += e.amount;
   });
-  return { totalExpense, totalGST, effectiveGSTRate: totalExpense > 0 ? (totalGST / (totalExpense - totalGST)) * 100 : 0 };
+  return { totalExpense, totalGST, effectiveGSTRate: totalExpense > 0 ? (totalGST / totalExpense) * 100 : 0 };
+};
+
+// --- COMPATIBILITY WRAPPER ---
+// This keeps App.jsx working without major rewrites
+export const calculateTax = (inputs) => {
+  const newRegime = calculateNewRegimeTax(inputs.grossIncome, inputs.isSalaried);
+  const oldRegime = calculateOldRegimeTax(inputs.grossIncome, inputs.deductions, inputs.isSalaried);
+  
+  let betterRegime = 'new';
+  let savings = oldRegime.totalTax - newRegime.totalTax;
+
+  if (newRegime.totalTax > oldRegime.totalTax) {
+    betterRegime = 'old';
+    savings = newRegime.totalTax - oldRegime.totalTax;
+  }
+
+  return { newRegime, oldRegime, betterRegime, savings };
 };

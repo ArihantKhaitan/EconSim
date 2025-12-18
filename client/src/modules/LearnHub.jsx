@@ -1,88 +1,112 @@
 // client/src/modules/LearnHub.jsx
 import React, { useState } from 'react';
 
-const TOPICS = [
-  { id: 1, term: 'GST (Goods & Services Tax)', short: 'One tax for the whole nation.', icon: '🛒' },
-  { id: 2, term: 'Old vs New Regime', short: 'Deductions vs Lower Rates.', icon: '⚖️' },
-  { id: 3, term: 'Fiscal Deficit', short: 'When govt spends more than it earns.', icon: '📉' },
-  { id: 4, term: 'Repo Rate', short: 'Interest rate at which RBI lends money.', icon: '🏦' },
-  { id: 5, term: 'Inflation', short: 'Rate at which prices increase over time.', icon: '🎈' },
-  { id: 6, term: 'Standard Deduction', short: 'Flat deduction from salary income.', icon: '✂️' },
-];
-
 export default function LearnHub() {
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [aiExplanation, setAiExplanation] = useState('');
+  const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const explainTopic = async (topic) => {
-    setLoading(true);
-    setAiExplanation('');
+  const topics = [
+    { id: 'fiscal-deficit', title: 'Fiscal Deficit', emoji: '📉' },
+    { id: 'repo-rate', title: 'Repo Rate', emoji: '🏦' },
+    { id: 'inflation', title: 'Inflation', emoji: '🎈' },
+    { id: 'gdp', title: 'GDP', emoji: '🌏' },
+    { id: 'gst', title: 'GST Structures', emoji: '🧾' },
+    { id: '80c', title: 'Section 80C', emoji: '💰' },
+  ];
+
+  const handleExplain = async (topic) => {
     setSelectedTopic(topic);
+    setLoading(true);
+    setExplanation(''); // Clear previous text
     
     try {
-      const response = await fetch('http://localhost:5000/api/explain-term', {
+      const response = await fetch('http://localhost:5000/api/ai/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ term: topic.term })
+        body: JSON.stringify({
+          // We send a specific prompt for learning
+          prompt: `Explain the financial concept of "${topic.title}" to a college student. Keep it simple, under 60 words, and use an analogy.`,
+          // ⚠️ CRITICAL: We must send dummy data so the backend doesn't crash
+          taxData: { income: 0, totalTax: 0, betterRegime: 'N/A' },
+          gstData: { totalGST: 0 },
+          userProfile: { displayName: 'Student' }
+        })
       });
+
+      if (!response.ok) throw new Error("Server Offline");
+      
       const data = await response.json();
-      setAiExplanation(data.explanation);
+      setExplanation(data.explanation);
     } catch (error) {
-      setAiExplanation("AI tutor is currently unavailable. Try again later!");
+      setExplanation("⚠️ Connection Error: Please ensure your backend server (node index.js) is running.");
     }
     setLoading(false);
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold">Financial Learn Hub</h2>
-        <p className="text-slate-400">Master economic concepts with AI assistance</p>
+    <div className="animate-fade-in space-y-8 pb-10">
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-indigo-900/50 to-blue-900/50 p-8 rounded-3xl border border-indigo-500/30 text-center relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+         <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 relative z-10">
+           Financial <span className="text-indigo-400">Learn Hub</span>
+         </h1>
+         <p className="text-slate-300 relative z-10">
+           Click any topic below to get an instant AI-powered explanation.
+         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {TOPICS.map((topic) => (
-          <div key={topic.id} className="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl transition-all cursor-pointer group" onClick={() => explainTopic(topic)}>
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{topic.icon}</div>
-            <h3 className="text-lg font-bold text-white mb-2">{topic.term}</h3>
-            <p className="text-slate-400 text-sm">{topic.short}</p>
-            <div className="mt-4 text-emerald-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              Click to Explain <span>→</span>
+      {/* TOPIC GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {topics.map(topic => (
+          <button
+            key={topic.id}
+            onClick={() => handleExplain(topic)}
+            className={`p-6 rounded-2xl border transition-all text-left group hover:-translate-y-1 ${
+              selectedTopic?.id === topic.id 
+                ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-900/50' 
+                : 'bg-slate-900/50 border-slate-700 hover:bg-slate-800 hover:border-indigo-500/50'
+            }`}
+          >
+            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{topic.emoji}</div>
+            <div className={`font-bold text-lg ${selectedTopic?.id === topic.id ? 'text-white' : 'text-slate-200'}`}>
+              {topic.title}
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
-      {/* AI Explanation Modal */}
-      {(selectedTopic || loading) && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm" onClick={() => setSelectedTopic(null)}>
-          <div className="bg-slate-900 border border-slate-700 p-8 rounded-2xl max-w-2xl w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setSelectedTopic(null)} className="absolute top-4 right-4 text-slate-500 hover:text-white">✕</button>
+      {/* AI OUTPUT AREA */}
+      <div className={`transition-all duration-500 ${selectedTopic ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        {selectedTopic && (
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-indigo-500/30 p-8 rounded-3xl shadow-2xl relative">
+            {/* Decorative Glow */}
+            <div className="absolute inset-0 bg-indigo-500/5 rounded-3xl animate-pulse-slow"></div>
             
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-4xl">{selectedTopic?.icon || '🤖'}</span>
-              <div>
-                <h3 className="text-2xl font-bold">{selectedTopic?.term || 'Analyzing...'}</h3>
-                <p className="text-emerald-400 text-sm">AI Tutor Mode</p>
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold text-indigo-400 mb-4 flex items-center gap-2">
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                    Thinking...
+                  </>
+                ) : (
+                  <>
+                    <span>✨</span> Gemini Explains: {selectedTopic.title}
+                  </>
+                )}
+              </h3>
+              
+              <div className="bg-slate-950/50 rounded-2xl p-6 border border-slate-800">
+                <p className="text-slate-200 leading-relaxed text-lg">
+                  {explanation || "Connecting to AI Agent..."}
+                </p>
               </div>
             </div>
-
-            <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 min-h-[150px]">
-              {loading ? (
-                <div className="flex items-center justify-center h-full gap-2 text-slate-400">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce delay-75" />
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce delay-150" />
-                  <span>Generative AI is thinking...</span>
-                </div>
-              ) : (
-                <p className="text-slate-300 leading-relaxed whitespace-pre-line">{aiExplanation}</p>
-              )}
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

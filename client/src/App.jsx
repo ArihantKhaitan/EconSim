@@ -1,46 +1,104 @@
+// client/src/App.jsx
 import React, { useState, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter as Router } from 'react-router-dom'; // <--- CRITICAL FIX
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Components
+// --- UTILS ---
+import { calculateTax, calculateGSTImpact, EXPENSE_ITEMS } from './utils/taxLogic';
+
+// --- COMPONENTS ---
 import Navbar from './components/Navbar';
+import AuthModal from './components/AuthModal';
+
+// --- MODULES ---
+// ⚠️ UPDATED IMPORTS TO MATCH YOUR FILE STRUCTURE
 import Dashboard from './modules/Dashboard';
-import IncomeTax from './modules/IncomeTax';
-import GSTCalculator from './modules/GSTCalculator';
+import IncomeTaxCalc from './modules/IncomeTax';        // You renamed the file to IncomeTax.jsx
+import GSTModule from './modules/GSTCalculator';        // You renamed the file to GSTCalculator.jsx
 import PolicySimulator from './modules/PolicySimulator';
 import LearnHub from './modules/LearnHub';
-import Login from './modules/Login';
-import Signup from './modules/Signup';
+import InflationModule from './modules/InflationModule';
 
-// Logic
-import { EXPENSE_ITEMS, calculateNewRegimeTax, calculateOldRegimeTax, calculateGSTImpact } from './utils/taxLogic';
-
-function DashboardLayout() {
+function AppContent() {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAuthModal, setShowAuthModal] = useState(true);
 
+  // --- 1. GLOBAL STATE: INCOME TAX ---
   const [taxInputs, setTaxInputs] = useState({
-    grossIncome: 1200000, isSalaried: true,
-    deductions: { section80C: 150000, section80D: 25000, section80CCD1B: 50000, hra: 0, homeLoanInterest: 0 }
+    grossIncome: 1200000,
+    isSalaried: true,
+    deductions: {
+       section80C: 150000,
+       section80D: 25000,
+       section80CCD1B: 0,
+       homeLoanInterest: 0,
+       hra: 0
+    }
   });
-  const [gstExpenses, setGstExpenses] = useState(EXPENSE_ITEMS.map(item => ({ ...item, amount: item.avgMonthly })));
 
-  const newRegimeTax = useMemo(() => calculateNewRegimeTax(taxInputs.grossIncome, taxInputs.isSalaried), [taxInputs.grossIncome, taxInputs.isSalaried]);
-  const oldRegimeTax = useMemo(() => calculateOldRegimeTax(taxInputs.grossIncome, taxInputs.deductions, taxInputs.isSalaried), [taxInputs.grossIncome, taxInputs.deductions, taxInputs.isSalaried]);
-  const betterRegime = newRegimeTax.totalTax <= oldRegimeTax.totalTax ? 'new' : 'old';
-  const taxSavings = Math.abs(newRegimeTax.totalTax - oldRegimeTax.totalTax);
+  // --- 2. GLOBAL STATE: GST EXPENSES ---
+  const [gstExpenses, setGstExpenses] = useState(EXPENSE_ITEMS);
+
+  // --- 3. REAL-TIME CALCULATIONS ---
+  const taxResult = useMemo(() => calculateTax(taxInputs), [taxInputs]);
   const gstImpact = useMemo(() => calculateGSTImpact(gstExpenses), [gstExpenses]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-emerald-500/30">
-      {/* NAVBAR now handles the profile and logout buttons */}
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-emerald-500/30">
       
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'dashboard' && <Dashboard taxInputs={taxInputs} setActiveTab={setActiveTab} newRegimeTax={newRegimeTax} oldRegimeTax={oldRegimeTax} betterRegime={betterRegime} taxSavings={taxSavings} gstImpact={gstImpact} />}
-        {activeTab === 'income-tax' && <IncomeTax taxInputs={taxInputs} setTaxInputs={setTaxInputs} newRegimeTax={newRegimeTax} oldRegimeTax={oldRegimeTax} betterRegime={betterRegime} taxSavings={taxSavings} />}
-        {activeTab === 'gst' && <GSTCalculator gstExpenses={gstExpenses} setGstExpenses={setGstExpenses} gstImpact={gstImpact} />}
-        {activeTab === 'policy-sim' && <PolicySimulator taxInputs={taxInputs} gstImpact={gstImpact} newRegimeTax={newRegimeTax} />}
-        {activeTab === 'learn' && <LearnHub />}
+      {!currentUser && showAuthModal && (
+        <AuthModal onGuestAccess={() => setShowAuthModal(false)} />
+      )}
+      
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {activeTab === 'dashboard' && (
+          <Dashboard 
+             taxInputs={taxInputs} 
+             newRegimeTax={taxResult.newRegime}
+             oldRegimeTax={taxResult.oldRegime}
+             betterRegime={taxResult.betterRegime}
+             taxSavings={taxResult.savings}
+             gstImpact={gstImpact}
+             setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'income-tax' && (
+          <IncomeTaxCalc 
+            inputs={taxInputs} 
+            setInputs={setTaxInputs} 
+            result={taxResult} 
+          />
+        )}
+
+        {activeTab === 'gst' && (
+          <GSTModule 
+            expenses={gstExpenses} 
+            setExpenses={setGstExpenses} 
+            result={gstImpact} 
+          />
+        )}
+
+        {activeTab === 'policy-sim' && (
+          <PolicySimulator 
+            taxInputs={taxInputs} 
+            gstImpact={gstImpact} 
+            newRegimeTax={taxResult.newRegime} 
+          />
+        )}
+
+        {activeTab === 'inflation' && (
+          <InflationModule gstImpact={gstImpact} />
+        )}
+
+        {activeTab === 'learn' && (
+           <LearnHub />
+        )}
+
       </main>
     </div>
   );
@@ -48,14 +106,11 @@ function DashboardLayout() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} /> 
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<DashboardLayout />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    // ⬇️ THIS ROUTER WRAPPER WAS MISSING
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
   );
 }
