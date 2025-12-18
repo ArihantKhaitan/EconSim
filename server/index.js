@@ -11,8 +11,8 @@ app.use(express.json());
 // 1. Setup Google Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// ✅ UPDATED: Using a model confirmed in your debug list
-const GOOGLE_MODEL_NAME = "gemini-2.0-flash"; 
+// ✅ CHANGED: Switched to 'gemini-2.5-flash' as per your request
+const GOOGLE_MODEL_NAME = "gemini-2.5-flash"; 
 
 // 2. Setup Ollama Helper (The Backup)
 async function callOllama(prompt) {
