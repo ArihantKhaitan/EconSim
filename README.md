@@ -1,34 +1,42 @@
-# 🏛️ EconSim - Intelligent Policy Impact Simulator
+# 🏛️ EconSim - Intelligent Policy & Inflation Simulator
 > **FinHack 2025 Submission | Track: FinTech for Social Impact (PS-5)**
+
+![Status](https://img.shields.io/badge/Status-Beta-purple) ![AI](https://img.shields.io/badge/AI-Hybrid%20Arch-emerald) ![Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20Firebase-blue)
 
 ## 📜 Problem Statement
 **ID 5: FinTech for Social Impact - Understand Tax and Subsidy Impacts in Real Time**
 
-Government policies (Budget revisions, GST changes, Fuel taxes) significantly impact purchasing power. However, citizens—especially students and small business owners—struggle to decode technical jargon to understand *exactly* how these changes affect their personal wallet.
+Government policies (Budget revisions, GST changes, Subsidies, Inflation control) significantly impact purchasing power. However, citizens—especially students and small business owners—struggle to decode technical jargon (CPI, WPI, Core Inflation) to understand *exactly* how these changes affect their personal wallet and standard of living.
 
 ---
 
 ## 💡 Our Solution: EconSim
-EconSim is a **microsimulation platform** that translates complex economic policies into personalized financial insights. Unlike static calculators, EconSim uses **Generative AI (Google Gemini 2.0)** to act as a real-time financial advisor, explaining impacts in plain English or Hinglish.
+EconSim is a **comprehensive microsimulation platform** that translates complex economic data into personalized financial insights.
 
-### 🌟 Key Features (Winning Edge)
+Unlike static calculators, EconSim features a **Hybrid AI Engine** (Cloud + Local) acting as a real-time financial advisor. It models not just taxes, but also **inflation shocks** and **social protection schemes** (like Ration Cards), making it a truly inclusive tool.
 
-#### 1. 🤖 AI Financial Advisor (Gemini Powered)
-* **Plain English & Hinglish:** Explains complex tax terms in simple language (e.g., *"Your savings increased by ₹5,000, which is like 2 months of free Wi-Fi"*).
-* **Personalized Tips:** Analyzes your specific data to offer actionable money-saving advice.
+---
 
-#### 2. ⚡ Real-Time Policy Sandbox & Cloud Save
-* **Interactive Sliders:** Run "What-If" scenarios (e.g., *"What if GST rises by 5%?"*) and see immediate impact on net savings.
-* **Cloud Persistence:** **Firebase Integration** allows users to Login (Google/Email) and **save their scenarios** to compare later.
+### 🌟 Key Features (The Winning Edge)
 
-#### 3. 📊 Advanced Visualization & Reporting
-* **Historical Trends:** Interactive charts showing how tax liability has changed over the last 3 fiscal years.
-* **PDF Reports:** One-click download of a professional "Financial Health Card" to share with CAs or Loan Officers.
-* **Social Sharing:** Instantly share tax savings summaries via WhatsApp/LinkedIn.
+#### 1. 🤖 Hybrid AI Architecture (Failover System)
+* **Dual-Engine Intelligence:** Uses **Google Gemini 2.0 Flash** for high-speed cloud analysis.
+* **Offline/Privacy Mode:** Automatically switches to a local **Ollama (Mistral)** model if internet fails or API limits are reached.
+* **Zero Downtime:** Ensures the demo works 100% of the time, regardless of venue Wi-Fi.
 
-#### 4. 💰 Comprehensive Tax Engine
-* **Dual-Regime Comparison:** Instantly compares Old vs. New Tax Regimes (FY 2025-26).
-* **GST Basket Simulator:** Visualizes how rate changes on specific categories (Tech, Essentials) impact monthly budgets.
+#### 2. 🎈 Advanced Inflation Tracker (Macro to Micro)
+* **Macro Trends:** Visualizes Headline CPI vs. Core Inflation vs. Super-Core Inflation.
+* **Personal Impact:** Calculates your *personal* inflation rate based on your specific spending basket.
+* **Social Shielding:** Simulate how possessing a **Ration Card** protects vulnerable groups from food supply shocks.
+
+#### 3. ⚡ Real-Time Policy Sandbox
+* **Interactive Sliders:** Model impacts of GST hikes, Fuel Tax changes, and **Government Subsidies**.
+* **Net Impact Visualizer:** See exactly how a ₹500 subsidy increase balances out a 2% GST hike in real-time.
+
+#### 4. 🎨 Modern Glassmorphism UI
+* **Financial Health Card:** One-click PDF reports for loan applications.
+* **Historical Trends:** Dynamic charts showing tax liability changes over 3 fiscal years.
+* **Smart Dashboard:** Auto-recommends the best Tax Regime (Old vs. New) based on FY 2025-26 logic.
 
 ---
 
@@ -36,70 +44,85 @@ EconSim is a **microsimulation platform** that translates complex economic polic
 
 | Component | Tech Stack | Description |
 | :--- | :--- | :--- |
-| **Frontend** | React.js + Vite | High-performance, responsive dashboard |
-| **Styling** | Tailwind CSS | Modern, accessible dark-mode UI |
-| **Charts** | Recharts | Dynamic historical & comparison graphs |
-| **Reporting** | html2pdf.js | Client-side PDF generation |
-| **Backend** | Node.js + Express | API for AI orchestration |
-| **Database** | Firebase Firestore | User data & scenario storage |
+| **Frontend** | React.js + Vite | High-performance, animated Glassmorphism UI |
+| **Styling** | Tailwind CSS | Responsive, dark-mode design system |
+| **Routing** | React Router v6 | Seamless SPA navigation |
+| **Charts** | Recharts | Interactive Data Visualization (Pie/Bar/Line) |
+| **Backend** | Node.js + Express | REST API handling AI orchestration |
+| **AI (Cloud)** | Google Gemini SDK | Primary Generative Model |
+| **AI (Local)** | Ollama (Mistral) | Fallback/Offline Generative Model |
+| **Database** | Firebase Firestore | Cloud save for user scenarios |
 | **Auth** | Firebase Auth | Secure Google & Email Login |
-| **AI Engine** | Google Gemini 2.0 | Natural Language Processing |
 
 ### 📂 Directory Structure
 ```bash
 EconSim/
 ├── client/
-│   ├── src/components/      # Reusable UI (Navbar, Charts, PDF, Share)
-│   ├── src/context/         # AuthContext (User Session Management)
-│   ├── src/modules/         # Core Features (Tax, GST, Policy Sim)
-│   └── src/firebase.js      # Firebase Configuration
+│   ├── src/modules/       # Feature Logic (Inflation, Tax, GST, Policy)
+│   ├── src/utils/         # Tax Logic & AI Helpers
+│   ├── src/components/    # Reusable UI (AuthModal, Navbar)
+│   └── src/context/       # Auth Context
 └── server/
-    └── index.js             # Gemini AI API Routes
+    ├── index.js           # Hybrid AI Router (Gemini -> Ollama Failover)
+    └── index_ollama.js    # Dedicated Local AI Server
 
-🚀 How to Run Locally
-Prerequisites
-Node.js (v18+)
+```
 
-Google Gemini API Key
+---
 
-Firebase Project (Auth & Firestore enabled)
+## 🚀 How to Run Locally
 
-Step 1: Clone the Repository
-Bash
+### Prerequisites
 
+* Node.js (v18+)
+* [Ollama](https://ollama.com/) (For local AI support)
+* Firebase Project Credentials
+
+### Step 1: Clone the Repository
+
+```bash
 git clone [https://github.com/ArihantKhaitan/EconSim.git](https://github.com/ArihantKhaitan/EconSim.git)
 cd EconSim
-Step 2: Setup Backend
-Bash
 
+```
+
+### Step 2: Setup Backend (Hybrid AI)
+
+```bash
 cd server
 npm install
-# Create a .env file and add your key:
-# GEMINI_API_KEY=your_google_ai_key_here
+# 1. Create a .env file: GEMINI_API_KEY=your_key_here
+# 2. Ensure Ollama is running in background: 'ollama run mistral'
 node index.js
-Step 3: Setup Frontend
-Bash
 
+```
+
+*Output should say: `🚀 HYBRID SERVER RUNNING on Port 5000*`
+
+### Step 3: Setup Frontend
+
+```bash
 # Open a new terminal
 cd client
 npm install
-# Ensure firebase.js has your valid config
-npm run dev
-Note: The app requires the backend server to be running on Port 5000 for AI features to work.
+npx vite --port 5173 --host
 
-💰 Business Model (Monetization)
-Freemium Model: Basic tax calculation is free. AI-driven personalized planning and PDF reports are Premium (₹99/month).
+```
 
-B2B Licensing: White-label the simulation engine for Banks and FinTech apps (e.g., "Check how this loan fits your post-tax budget").
+*Access the dashboard at `http://localhost:5173*`
 
-Educational Partnerships: Licensing to colleges for Economics/Commerce labs.
+---
 
-🔮 Future Roadmap
-🌍 Vernacular Voice Mode: Voice-to-voice financial advice in Hindi, Tamil, and Kannada for rural literacy.
+## 🌍 Social Impact & Inclusivity
 
-📈 Live RBI Integration: Real-time Repo Rate fetching to update loan EMI impact dynamically.
+* **Ration Card Logic:** We explicitly model how government subsidies protect the bottom 20% of the economy from food inflation.
+* **Hinglish AI:** The advisor can explain complex financial concepts in mixed Hindi-English for broader accessibility.
+* **Education Hub:** Dedicated module to teach students about Fiscal Deficit, Repo Rates, and GDP.
 
-🏢 Corporate Tax Module: Extending the simulator for SMEs and Startups.
+---
 
-👥 Contributors
-Arihant Khaitan 
+## 💰 Business Model
+
+1. **Freemium B2C:** Basic calculation is free. Detailed PDF reports and AI Investment planning are Premium (₹99/mo).
+2. **B2B/GovTech:** White-label the "Policy Simulator" for government portals to help citizens understand new budgets.
+3. **API Licensing:** Allow FinTech apps to use our "Personal Inflation Engine".
