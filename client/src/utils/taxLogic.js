@@ -18,24 +18,30 @@ export const OLD_TAX_SLABS = [
   { min: 1000000, max: Infinity, rate: 0.30, label: 'Above ₹10L' },
 ];
 
+// EXPANDED GST CATEGORIES
 export const GST_CATEGORIES = {
-  exempt: { rate: 0, label: 'Exempt (0%)', items: ['Fresh Fruits', 'Vegetables', 'Milk', 'Eggs', 'Bread', 'Rice', 'Wheat'], color: '#10B981' },
-  essential: { rate: 5, label: 'Essential (5%)', items: ['Packaged Food', 'Tea', 'Coffee', 'Medicines', 'Soap', 'Toothpaste'], color: '#3B82F6' },
-  standard: { rate: 18, label: 'Standard (18%)', items: ['Electronics', 'Mobile', 'Laptops', 'TVs', 'AC', 'Restaurant', 'Hotels'], color: '#F59E0B' },
-  luxury: { rate: 40, label: 'Luxury (40%)', items: ['Luxury Cars', 'Tobacco', 'Pan Masala', 'Aerated Drinks'], color: '#EF4444' }
+  exempt: { rate: 0, label: 'Exempt (0%)', items: ['Fresh Veggies', 'Milk', 'Bread', 'Books', 'Salt'], color: '#10B981' }, // Emerald
+  essential: { rate: 5, label: 'Essential (5%)', items: ['Tea/Coffee', 'Medicine', 'Economy Flights', 'Spices'], color: '#3B82F6' }, // Blue
+  standard_low: { rate: 12, label: 'Standard (12%)', items: ['Processed Food', 'Computers', 'Business Class Air'], color: '#8B5CF6' }, // Violet
+  standard_high: { rate: 18, label: 'Standard (18%)', items: ['Electronics', 'Restaurant', 'Hair Oil', 'Soap'], color: '#F59E0B' }, // Amber
+  luxury: { rate: 28, label: 'Luxury (28%)', items: ['ACs', 'Refrigerators', 'Automobiles', 'Cement'], color: '#EC4899' }, // Pink
+  sin: { rate: 40, label: 'Sin Goods (40%*)', items: ['Tobacco', 'Aerated Drinks', 'Pan Masala'], color: '#EF4444' } // Red
 };
 
+// EXPANDED EXPENSE LIST (Includes explicit Luxury & Standard options)
 export const EXPENSE_ITEMS = [
-  { name: 'Groceries (Fresh)', category: 'exempt', amount: 4000, avgMonthly: 4000, gst: 0 },
-  { name: 'Groceries (Packaged)', category: 'essential', amount: 5000, avgMonthly: 5000, gst: 5 },
-  { name: 'Mobile & Internet', category: 'standard', amount: 1500, avgMonthly: 1500, gst: 18 },
-  { name: 'Electricity', category: 'exempt', amount: 2000, avgMonthly: 2000, gst: 0 },
-  { name: 'Dining Out', category: 'standard', amount: 3000, avgMonthly: 3000, gst: 18 },
-  { name: 'Petrol/Diesel', category: 'exempt', amount: 5000, avgMonthly: 5000, gst: 0 },
-  { name: 'Medicine', category: 'essential', amount: 1000, avgMonthly: 1000, gst: 5 },
-  { name: 'Clothing', category: 'standard', amount: 2000, avgMonthly: 2000, gst: 18 },
-  { name: 'Entertainment', category: 'standard', amount: 1000, avgMonthly: 1000, gst: 18 },
-  { name: 'Insurance', category: 'standard', amount: 2000, avgMonthly: 2000, gst: 18 },
+  { name: 'Groceries (Fresh)', category: 'exempt', amount: 5000, avgMonthly: 5000, gst: 0 },
+  { name: 'Rent/Maintenance', category: 'exempt', amount: 15000, avgMonthly: 15000, gst: 0 },
+  { name: 'Medicines', category: 'essential', amount: 1500, avgMonthly: 1500, gst: 5 },
+  { name: 'Mobile & Data', category: 'standard_high', amount: 1000, avgMonthly: 1000, gst: 18 },
+  { name: 'Dining & Zomato', category: 'standard_high', amount: 3000, avgMonthly: 3000, gst: 18 },
+  { name: 'Electronics/Gadgets', category: 'standard_high', amount: 2000, avgMonthly: 2000, gst: 18 },
+  { name: 'Clothes (Branded)', category: 'standard_low', amount: 2500, avgMonthly: 2500, gst: 12 },
+  { name: 'Petrol/Diesel', category: 'exempt', amount: 4000, avgMonthly: 4000, gst: 0 },
+  { name: 'Movies/OTT', category: 'standard_high', amount: 500, avgMonthly: 500, gst: 18 },
+  { name: 'Luxury Vacation/Hotel', category: 'luxury', amount: 5000, avgMonthly: 5000, gst: 28 },
+  { name: 'Air Conditioner/Fridge', category: 'luxury', amount: 2000, avgMonthly: 2000, gst: 28 },
+  { name: 'Car EMI/Maintenance', category: 'luxury', amount: 0, avgMonthly: 0, gst: 28 },
 ];
 
 // ==================== FUNCTIONS ====================
@@ -109,8 +115,6 @@ export const calculateOldRegimeTax = (income, deductions = {}, isSalaried = true
 export const calculateGSTImpact = (expenses) => {
   let totalGST = 0, totalExpense = 0;
   expenses.forEach(e => {
-    // Assuming 'amount' is inclusive of GST for user simplicity, so we back-calculate
-    // Formula: GST Part = Amount - (Amount / (1 + Rate/100))
     const gstAmount = e.amount - (e.amount / (1 + e.gst / 100));
     totalGST += gstAmount;
     totalExpense += e.amount;
@@ -118,8 +122,6 @@ export const calculateGSTImpact = (expenses) => {
   return { totalExpense, totalGST, effectiveGSTRate: totalExpense > 0 ? (totalGST / totalExpense) * 100 : 0 };
 };
 
-// --- COMPATIBILITY WRAPPER ---
-// This keeps App.jsx working without major rewrites
 export const calculateTax = (inputs) => {
   const newRegime = calculateNewRegimeTax(inputs.grossIncome, inputs.isSalaried);
   const oldRegime = calculateOldRegimeTax(inputs.grossIncome, inputs.deductions, inputs.isSalaried);

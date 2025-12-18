@@ -1,9 +1,9 @@
-// client/src/modules/IncomeTaxCalc.jsx
+// client/src/modules/IncomeTax.jsx
 import React from 'react';
 import { NEW_TAX_SLABS_2025, formatCurrency } from '../utils/taxLogic';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function IncomeTaxCalc({ inputs, setInputs, result }) {
-  // Aliases to match your provided code's prop names
   const taxInputs = inputs;
   const setTaxInputs = setInputs;
   const newRegimeTax = result.newRegime;
@@ -11,15 +11,26 @@ export default function IncomeTaxCalc({ inputs, setInputs, result }) {
   const betterRegime = result.betterRegime;
   const taxSavings = result.savings;
 
+  const chartData = [
+    { name: 'New Regime', tax: newRegimeTax.totalTax, net: newRegimeTax.netIncome, color: '#10B981' },
+    { name: 'Old Regime', tax: oldRegimeTax.totalTax, net: oldRegimeTax.netIncome, color: '#3B82F6' }
+  ];
+
   return (
     <div className="space-y-8 animate-fade-in pb-12">
-      <div>
-        <h2 className="text-2xl font-bold">Income Tax Calculator</h2>
-        <p className="text-slate-400">FY 2025-26 (AY 2026-27) • Budget 2025</p>
+      <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+        <div>
+           <h2 className="text-2xl font-bold">Income Tax Calculator</h2>
+           <p className="text-slate-400">FY 2025-26 (AY 2026-27) • Budget 2025</p>
+        </div>
+        <div className="bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+           <span className="text-xs text-slate-400 block">Projected Savings</span>
+           <span className="text-xl font-bold text-emerald-400">{formatCurrency(taxSavings)}</span>
+        </div>
       </div>
       
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Inputs */}
+        {/* INPUTS SECTION */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6">
           <h3 className="text-lg font-semibold">Your Details</h3>
           
@@ -60,8 +71,34 @@ export default function IncomeTaxCalc({ inputs, setInputs, result }) {
           </div>
         </div>
 
-        {/* Results */}
+        {/* RESULTS & CHART SECTION */}
         <div className="lg:col-span-2 space-y-6">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+            <h3 className="text-lg font-semibold mb-4">Tax Liability Comparison</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={true} vertical={false} />
+                  <XAxis type="number" stroke="#94a3b8" tickFormatter={(val) => `₹${val/1000}k`} />
+                  <YAxis dataKey="name" type="category" stroke="#fff" width={100} />
+                  <Tooltip 
+                    cursor={{fill: '#334155', opacity: 0.2}}
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', color: '#fff' }}
+                    itemStyle={{ color: '#fff' }}
+                    labelStyle={{ color: '#fff' }}
+                    formatter={(val) => formatCurrency(val)}
+                  />
+                  <Bar dataKey="tax" name="Tax Payable" radius={[0, 4, 4, 0]} barSize={40}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-center text-slate-500 mt-2">Lower bar is better. The {betterRegime === 'new' ? 'New' : 'Old'} Regime is winning.</p>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             {/* New Regime Result */}
             <div className={`bg-slate-900/80 border rounded-2xl p-6 ${betterRegime === 'new' ? 'ring-2 ring-emerald-500 border-emerald-500' : 'border-slate-800'}`}>
@@ -74,7 +111,6 @@ export default function IncomeTaxCalc({ inputs, setInputs, result }) {
                 <div className="flex justify-between py-2 border-b border-slate-700"><span className="text-slate-400">Std Deduction</span><span className="font-mono text-emerald-400">-{formatCurrency(newRegimeTax.standardDeduction)}</span></div>
                 <div className="flex justify-between py-2 border-b border-slate-700"><span className="text-slate-400">Taxable</span><span className="font-mono text-white">{formatCurrency(newRegimeTax.taxableIncome)}</span></div>
                 <div className="p-4 rounded-xl bg-emerald-500/20 flex justify-between items-center"><span className="font-semibold text-emerald-100">Total Tax</span><span className="font-mono text-2xl font-bold text-emerald-400">{formatCurrency(newRegimeTax.totalTax)}</span></div>
-                <div className="p-3 rounded-lg bg-slate-800"><div className="flex justify-between"><span className="text-slate-400">Net Income</span><span className="font-mono font-semibold text-white">{formatCurrency(newRegimeTax.netIncome)}</span></div></div>
               </div>
             </div>
 
@@ -89,16 +125,7 @@ export default function IncomeTaxCalc({ inputs, setInputs, result }) {
                 <div className="flex justify-between py-2 border-b border-slate-700"><span className="text-slate-400">Deductions</span><span className="font-mono text-blue-400">-{formatCurrency(oldRegimeTax.totalDeductions)}</span></div>
                 <div className="flex justify-between py-2 border-b border-slate-700"><span className="text-slate-400">Taxable</span><span className="font-mono text-white">{formatCurrency(oldRegimeTax.taxableIncome)}</span></div>
                 <div className="p-4 rounded-xl bg-blue-500/20 flex justify-between items-center"><span className="font-semibold text-blue-100">Total Tax</span><span className="font-mono text-2xl font-bold text-blue-400">{formatCurrency(oldRegimeTax.totalTax)}</span></div>
-                <div className="p-3 rounded-lg bg-slate-800"><div className="flex justify-between"><span className="text-slate-400">Net Income</span><span className="font-mono font-semibold text-white">{formatCurrency(oldRegimeTax.netIncome)}</span></div></div>
               </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl ${betterRegime === 'new' ? 'bg-emerald-500/20' : 'bg-blue-500/20'}`}>✨</div>
-            <div className="flex-1">
-              <h4 className="text-lg font-semibold text-white">{betterRegime === 'new' ? 'New' : 'Old'} Regime saves you more!</h4>
-              <p className="text-slate-400">Save <span className={`font-bold ${betterRegime === 'new' ? 'text-emerald-400' : 'text-blue-400'}`}>{formatCurrency(taxSavings)}</span> annually ({formatCurrency(taxSavings / 12)}/month)</p>
             </div>
           </div>
         </div>

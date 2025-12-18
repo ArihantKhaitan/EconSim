@@ -10,17 +10,19 @@ app.use(express.json());
 
 // 1. Setup Google Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-// We use the "Lite" model as primary because it's faster
-const GOOGLE_MODEL_NAME = "gemini-2.0-flash-lite"; 
+
+// ✅ UPDATED: Using a model confirmed in your debug list
+const GOOGLE_MODEL_NAME = "gemini-2.0-flash"; 
 
 // 2. Setup Ollama Helper (The Backup)
 async function callOllama(prompt) {
   try {
+    // ⚠️ Ensure Ollama is running: 'ollama run mistral'
     const response = await fetch('http://127.0.0.1:11434/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: "mistral", // Ensure you have this model: 'ollama run mistral'
+        model: "mistral", 
         prompt: prompt,
         stream: false
       })
@@ -36,7 +38,7 @@ async function callOllama(prompt) {
 
 // 3. The "Smart Switcher" Function
 async function generateSmartContent(prompt) {
-  console.log("🤖 Attempting generation with Google Gemini...");
+  console.log(`🤖 Attempting generation with Google Gemini (${GOOGLE_MODEL_NAME})...`);
   
   try {
     // TRY 1: Google Gemini
@@ -63,11 +65,11 @@ async function generateSmartContent(prompt) {
 
 // --- ROUTE 1: POLICY SIMULATOR SLIDERS ---
 app.post('/api/explain-impact', async (req, res) => {
-  const { income, gstChange, taxChange, fuelChange } = req.body;
+  const { income, gstChange, taxChange, fuelChange, subsidyChange } = req.body;
   
   const prompt = `
     Act as a financial advisor. User Income: ₹${income}.
-    Scenario: GST ${gstChange}%, Income Tax ${taxChange}%, Fuel ₹${fuelChange}.
+    Scenario: GST ${gstChange}%, Income Tax ${taxChange}%, Fuel Tax ₹${fuelChange}, Subsidy Benefit ₹${subsidyChange}.
     Explain the impact on buying power in exactly 2 short sentences.
   `;
 
@@ -82,8 +84,8 @@ app.post('/api/ai/explain', async (req, res) => {
   const fullPrompt = `
     You are a friendly Indian financial advisor.
     User Name: ${userProfile?.displayName || 'Friend'}
-    Income: ₹${taxData.income}
-    Total Tax: ₹${taxData.totalTax}
+    Income: ₹${taxData?.income || '0'}
+    Total Tax: ₹${taxData?.totalTax || '0'}
     
     User Question: "${prompt}"
     

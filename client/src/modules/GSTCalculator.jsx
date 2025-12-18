@@ -1,16 +1,14 @@
-// client/src/modules/GSTModule.jsx
+// client/src/modules/GSTCalculator.jsx
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { GST_CATEGORIES, formatCurrency } from '../utils/taxLogic';
 
 export default function GSTModule({ expenses, setExpenses, result }) {
-  // Alias to match your provided code
   const gstExpenses = expenses;
   const setGstExpenses = setExpenses;
   const gstImpact = result;
 
   const gstBreakdownData = Object.entries(GST_CATEGORIES).map(([key, cat]) => {
-    // Check if item's category matches current loop category key
     const total = gstExpenses.filter(e => e.category === key).reduce((sum, e) => sum + e.amount, 0);
     return { name: cat.label, value: total, color: cat.color };
   }).filter(d => d.value > 0);
@@ -38,7 +36,7 @@ export default function GSTModule({ expenses, setExpenses, result }) {
               <div key={i} className="p-4 rounded-xl bg-slate-800 border border-slate-700">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-white">{expense.name}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${expense.gst === 0 ? 'bg-emerald-500/20 text-emerald-400' : expense.gst === 5 ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>{expense.gst}% GST</span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${expense.gst === 0 ? 'bg-emerald-500/20 text-emerald-400' : expense.gst === 5 ? 'bg-blue-500/20 text-blue-400' : expense.gst === 12 ? 'bg-violet-500/20 text-violet-400' : expense.gst === 28 ? 'bg-pink-500/20 text-pink-400' : 'bg-orange-500/20 text-orange-400'}`}>{expense.gst}% GST</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <input type="range" min="0" max={expense.avgMonthly * 3} step="100" value={expense.amount}
@@ -61,7 +59,12 @@ export default function GSTModule({ expenses, setExpenses, result }) {
                 <Pie data={gstBreakdownData} cx="50%" cy="50%" innerRadius={80} outerRadius={120} paddingAngle={3} dataKey="value">
                   {gstBreakdownData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff' }} />
+                <Tooltip 
+                  formatter={(value) => formatCurrency(value)} 
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', color: '#fff' }} 
+                  itemStyle={{ color: '#fff' }}
+                  labelStyle={{ color: '#fff' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

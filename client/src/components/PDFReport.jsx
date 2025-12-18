@@ -1,4 +1,4 @@
-// File: client/src/components/PDFReport.jsx
+// client/src/components/PDFReport.jsx
 
 import React from 'react';
 
@@ -101,12 +101,14 @@ const PDFReport = ({ taxData, gstData, userProfile }) => {
   };
 
   return (
-    <button
-      onClick={generatePDF}
-      className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold hover:shadow-lg hover:shadow-red-500/25 transition-all"
-    >
-      📄 Download PDF Report
-    </button>
+    <div className="flex justify-center w-full"> {/* ADDED WRAPPER FOR CENTERING */}
+      <button
+        onClick={generatePDF}
+        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold hover:shadow-lg hover:shadow-red-500/25 transition-all"
+      >
+        📄 Download PDF Report
+      </button>
+    </div>
   );
 };
 
