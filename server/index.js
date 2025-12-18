@@ -8,63 +8,95 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Gemini
+// 1. Setup Google Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// We use the "Lite" model as primary because it's faster
+const GOOGLE_MODEL_NAME = "gemini-2.0-flash-lite"; 
 
-// 1. ORIGINAL ROUTE (For Policy Simulator Sliders)
-app.post('/api/explain-impact', async (req, res) => {
+// 2. Setup Ollama Helper (The Backup)
+async function callOllama(prompt) {
   try {
-    const { income, gstChange, taxChange, fuelChange } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Or gemini-pro
+    const response = await fetch('http://127.0.0.1:11434/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: "mistral", // Ensure you have this model: 'ollama run mistral'
+        prompt: prompt,
+        stream: false
+      })
+    });
+    if (!response.ok) throw new Error("Ollama connection failed");
+    const data = await response.json();
+    return data.response;
+  } catch (error) {
+    console.error("❌ Ollama also failed:", error.message);
+    throw new Error("System Overload: Both AI services are currently unavailable.");
+  }
+}
 
-    const prompt = `
-      Act as a financial advisor. User Income: ₹${income}.
-      Scenario: GST ${gstChange}%, Income Tax ${taxChange}%, Fuel ₹${fuelChange}.
-      Explain impact on buying power in 2 sentences.
-    `;
-
+// 3. The "Smart Switcher" Function
+async function generateSmartContent(prompt) {
+  console.log("🤖 Attempting generation with Google Gemini...");
+  
+  try {
+    // TRY 1: Google Gemini
+    const model = genAI.getGenerativeModel({ model: GOOGLE_MODEL_NAME });
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    res.json({ explanation: text });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "AI Error" });
-  }
-});
-
-// 2. NEW ROUTE (For AI Explainer Component - Hinglish/Detailed)
-app.post('/api/ai/explain', async (req, res) => {
-  try {
-    const { prompt, taxData, gstData, userProfile } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    // Construct a rich context for the AI
-    const fullPrompt = `
-      You are a friendly Indian financial advisor explaining taxes to a student/citizen.
-      
-      User Profile:
-      - Name: ${userProfile?.displayName || 'Citizen'}
-      - Annual Income: ₹${taxData.income}
-      - Total Tax: ₹${taxData.totalTax}
-      - Best Regime: ${taxData.betterRegime}
-      - Monthly GST Paid: ₹${gstData?.totalGST || 0}
-      
-      User Question/Mode: "${prompt}"
-      
-      Guidelines:
-      - Keep it under 100 words.
-      - Use formatting (bolding, bullet points) if helpful.
-      - Be encouraging.
-    `;
-
-    const result = await model.generateContent(fullPrompt);
     const response = await result.response;
-    res.json({ explanation: response.text() });
+    console.log("✅ Served by Google Gemini");
+    return response.text();
+
   } catch (error) {
-    console.error("AI Explainer Error:", error);
-    res.status(500).json({ explanation: "AI service is currently busy. Please try again." });
+    // CATCH: If Google fails (429 Limit, 503 Overload, etc.)
+    console.warn(`⚠️ Gemini Failed (${error.message}). Switching to Local Ollama...`);
+    
+    // TRY 2: Local Ollama
+    try {
+      const ollamaResponse = await callOllama(prompt);
+      console.log("✅ Served by Local Ollama (Backup)");
+      return ollamaResponse;
+    } catch (finalError) {
+      return "AI Service Unavailable: Please try again later.";
+    }
   }
+}
+
+// --- ROUTE 1: POLICY SIMULATOR SLIDERS ---
+app.post('/api/explain-impact', async (req, res) => {
+  const { income, gstChange, taxChange, fuelChange } = req.body;
+  
+  const prompt = `
+    Act as a financial advisor. User Income: ₹${income}.
+    Scenario: GST ${gstChange}%, Income Tax ${taxChange}%, Fuel ₹${fuelChange}.
+    Explain the impact on buying power in exactly 2 short sentences.
+  `;
+
+  const text = await generateSmartContent(prompt);
+  res.json({ explanation: text });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// --- ROUTE 2: DASHBOARD AI EXPLAINER ---
+app.post('/api/ai/explain', async (req, res) => {
+  const { prompt, taxData, userProfile } = req.body;
+
+  const fullPrompt = `
+    You are a friendly Indian financial advisor.
+    User Name: ${userProfile?.displayName || 'Friend'}
+    Income: ₹${taxData.income}
+    Total Tax: ₹${taxData.totalTax}
+    
+    User Question: "${prompt}"
+    
+    Please explain this simply in under 60 words. Be encouraging. Use the Rupee symbol (₹).
+  `;
+
+  const text = await generateSmartContent(fullPrompt);
+  res.json({ explanation: text });
+});
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`\n🚀 HYBRID SERVER RUNNING on Port ${PORT}`);
+  console.log(`   Primary: Google Gemini (${GOOGLE_MODEL_NAME})`);
+  console.log(`   Backup:  Local Ollama (Mistral)\n`);
+});
