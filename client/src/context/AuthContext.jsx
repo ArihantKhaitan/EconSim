@@ -1,15 +1,15 @@
-// client/src/context/AuthContext.jsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, googleProvider } from "../firebase"; // Import provider
+import React, { useContext, useState, useEffect } from "react";
+import { auth, googleProvider } from "../firebase"; // Keep your existing firebase import
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  signInWithPopup, // Import popup
+  signInWithPopup, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  updateProfile 
 } from "firebase/auth";
 
-const AuthContext = createContext();
+const AuthContext = React.createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -17,22 +17,33 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [isGuest, setIsGuest] = useState(false); // ✅ Added Guest State
   const [loading, setLoading] = useState(true);
 
-  function signup(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+  // ✅ Updated: Signup now takes 'name' and updates profile immediately
+  function signup(email, password, name) {
+    return createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        return updateProfile(userCredential.user, { displayName: name });
+      });
   }
 
   function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  // --- NEW: GOOGLE LOGIN ---
-  function googleSignIn() {
+  function loginWithGoogle() {
     return signInWithPopup(auth, googleProvider);
   }
 
+  // ✅ New: Guest Login Logic
+  function loginAsGuest() {
+    setIsGuest(true);
+  }
+
+  // ✅ Updated: Logout clears Guest state AND Firebase auth
   function logout() {
+    setIsGuest(false);
     return signOut(auth);
   }
 
@@ -46,9 +57,11 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    login,
+    isGuest, // Export this
     signup,
-    googleSignIn, // Export it
+    login,
+    loginWithGoogle,
+    loginAsGuest, // Export this
     logout
   };
 
