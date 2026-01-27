@@ -5,7 +5,7 @@ import { getFirestore } from "firebase/firestore";
 
 // Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "",
+  apiKey: "AIzaSyCdZrss0g7RDAe6Wz5453-WuOQj5j7Z5qg",
   authDomain: "econsim-a2bab.firebaseapp.com",
   projectId: "econsim-a2bab",
   storageBucket: "econsim-a2bab.firebasestorage.app",

@@ -73,8 +73,32 @@ app.post('/api/explain-impact', async (req, res) => {
     Explain the impact on buying power in exactly 2 short sentences.
   `;
 
-  const text = await generateSmartContent(prompt);
-  res.json({ explanation: text });
+  let aiEngine = 'gemini';
+  let text = '';
+
+  try {
+    const model = genAI.getGenerativeModel({ model: GOOGLE_MODEL_NAME });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    text = response.text();
+    aiEngine = 'gemini';
+    console.log("✅ Served by Google Gemini");
+  } catch (error) {
+    console.warn(`⚠️ Gemini Failed. Switching to Ollama...`);
+    try {
+      text = await callOllama(prompt);
+      aiEngine = 'ollama';
+      console.log("✅ Served by Local Ollama");
+    } catch (finalError) {
+      text = "System overloaded. Please try again.";
+      aiEngine = 'error';
+    }
+  }
+
+  res.json({ 
+    explanation: text,
+    aiEngine: aiEngine  // ← NEW!
+  });
 });
 
 // --- ROUTE 2: DASHBOARD AI EXPLAINER ---
@@ -92,8 +116,32 @@ app.post('/api/ai/explain', async (req, res) => {
     Please explain this simply in under 60 words. Be encouraging. Use the Rupee symbol (₹).
   `;
 
-  const text = await generateSmartContent(fullPrompt);
-  res.json({ explanation: text });
+  let aiEngine = 'gemini'; // Track which engine responds
+  let text = '';
+
+  try {
+    const model = genAI.getGenerativeModel({ model: GOOGLE_MODEL_NAME });
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    text = response.text();
+    aiEngine = 'gemini';
+    console.log("✅ Served by Google Gemini");
+  } catch (error) {
+    console.warn(`⚠️ Gemini Failed (${error.message}). Switching to Local Ollama...`);
+    try {
+      text = await callOllama(fullPrompt);
+      aiEngine = 'ollama';
+      console.log("✅ Served by Local Ollama (Backup)");
+    } catch (finalError) {
+      text = "AI Service Unavailable: Please try again later.";
+      aiEngine = 'error';
+    }
+  }
+
+  res.json({ 
+    explanation: text,
+    aiEngine: aiEngine  // ← THIS IS NEW! Send which engine was used
+  });
 });
 
 const PORT = 5000;
