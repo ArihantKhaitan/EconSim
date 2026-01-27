@@ -1,3 +1,4 @@
+// client/src/modules/ImportDutyCalculator.jsx
 import React, { useState } from 'react';
 
 const formatCurrency = (amount) => {
@@ -54,65 +55,95 @@ export default function ImportDutyCalculator() {
     {
       name: 'Smartphones',
       emoji: '📱',
-      basePrice: 25000, // ₹25k for mid-range phone
+      basePrice: 25000, 
       dutyRate: 20,
       origin: 'China/Vietnam',
       description: 'Mobile phones imported face 20% customs duty. This is why iPhones & Samsung flagships are so expensive in India compared to USA.',
       impact: 'A ₹25,000 phone costs ₹30,000 with duty. On Apple, this difference is even bigger (₹1,50,000 → ₹1,80,000+).',
-      whoAffects: 'Tech-savvy consumers, students, professionals who want latest phones'
+      whoAffects: 'Tech-savvy consumers, students, professionals who want latest phones',
+      realWorld: [
+        '🍎 iPhone 15: Costs $799 in USA (₹67k) but ₹89,999 in India.',
+        '📈 Import duty + GST makes it ₹22,999 MORE expensive in India.',
+        '🇮🇳 Indian alternative: OnePlus & Realme price competitively to benefit.'
+      ]
     },
     {
       name: 'Laptops & Computers',
       emoji: '💻',
-      basePrice: 60000, // ₹60k laptop
+      basePrice: 60000, 
       dutyRate: 20,
       origin: 'China/Taiwan',
       description: 'Electronics have 20% import duty. A ₹60k laptop becomes ₹72k. High-end gaming laptops see even bigger absolute cost increases.',
       impact: 'A ₹1,00,000 laptop costs ₹1,20,000 with duty. Makes gaming & workstations unaffordable for students.',
-      whoAffects: 'Students, freelancers, content creators needing high-spec machines'
+      whoAffects: 'Students, freelancers, content creators needing high-spec machines',
+      realWorld: [
+        '💻 MacBook Air: $1,099 in USA (₹92k) but ₹1,14,900 in India.',
+        '📈 Duty makes it ₹22k more expensive.',
+        '🇮🇳 Effect: Many students buy refurbished/second-hand to avoid cost.'
+      ]
     },
     {
       name: 'Crude Oil Import',
       emoji: '🛢️',
-      basePrice: 80, // $80 per barrel = ~₹6,500
+      basePrice: 80, 
       dutyRate: 5,
       unit: 'per barrel',
       origin: 'Middle East/USA',
       description: 'India imports 85% of crude oil. Import duty & taxes add ₹2-3 per liter to fuel. This affects transport costs nationwide.',
       impact: 'Petrol: ₹100/liter base → ₹102-103 with duty/tax. On 1000L/month fuel consumption (taxi/truck), costs ₹2,000-3,000 extra.',
-      whoAffects: 'Transportation industry, logistics, daily commuters (indirect effect on Uber/Ola fares)'
+      whoAffects: 'Transportation industry, logistics, daily commuters (indirect effect on Uber/Ola fares)',
+      realWorld: [
+        '⛽ Petrol prices: Change daily based on crude oil import costs.',
+        '📈 Duty & taxes add ₹25+ per liter.',
+        '🚗 Effect: CNG cars become attractive. EV adoption increases.'
+      ]
     },
     {
       name: 'Appliances (Washing Machine)',
       emoji: '🧺',
-      basePrice: 35000, // ₹35k washing machine
+      basePrice: 35000, 
       dutyRate: 20,
       origin: 'China/Thailand',
       description: '20% duty on home appliances. Imported machines from China are cheaper, but duty adds ₹7,000. This protects local manufacturers.',
       impact: 'A ₹35k washing machine becomes ₹42k. Makes it unaffordable for lower-middle class.',
-      whoAffects: 'Households buying appliances, middle-class families'
+      whoAffects: 'Households buying appliances, middle-class families',
+      realWorld: [
+        '🧺 Washing Machines: Samsung pays duty, raises India prices 20%.',
+        '📈 Local brand Godrej can price lower → gains market share.',
+        '🏭 Effect: Local manufacturing encouraged, jobs created.'
+      ]
     },
     {
       name: 'Electronics Components (Chips)',
       emoji: '🔌',
-      basePrice: 500, // per unit chip
+      basePrice: 500, 
       dutyRate: 15,
       unit: 'per chip',
       origin: 'Taiwan/South Korea',
       description: 'Semiconductor chips have 15% duty. These are used in all electronics—phones, cars, appliances. The duty cascades through the entire supply chain.',
       impact: 'A ₹500 chip becomes ₹575. When a phone needs 50 chips, duty adds ₹3,750 to its cost.',
-      whoAffects: 'Entire electronics industry, eventually all consumers (passed in final prices)'
+      whoAffects: 'Entire electronics industry, eventually all consumers (passed in final prices)',
+      realWorld: [
+        '🔌 Chip shortage: Duty increases cost of chips in all electronics.',
+        '📈 Cascading effect: Phone cost ↑, laptop cost ↑, car cost ↑',
+        '🇮🇳 Government goal: Build domestic semiconductor plants (India Chip Mission)'
+      ]
     },
     {
       name: 'Agricultural Products (Wheat)',
       emoji: '🌾',
-      basePrice: 20, // ₹20/kg import price
+      basePrice: 20, 
       dutyRate: 40,
       unit: 'per kg',
       origin: 'Australia/Ukraine',
       description: 'India sometimes imports food grains. 40% import duty + quota system makes imported wheat expensive, protecting Indian farmers.',
       impact: 'Imported wheat: ₹20/kg base → ₹28/kg with duty. India prefers domestic supply to keep food prices low.',
-      whoAffects: 'Food prices, farmers (protected), consumers (protected)'
+      whoAffects: 'Food prices, farmers (protected), consumers (protected)',
+      realWorld: [
+        '🌾 Wheat import: 40% duty keeps it expensive → domestic supply preferred',
+        '📈 Protects Indian farmers from global price swings',
+        '🍞 Effect: Bread prices remain stable, farmers get fair price'
+      ]
     }
   ];
 
@@ -292,48 +323,10 @@ export default function ImportDutyCalculator() {
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-4 rounded-xl border border-slate-700">
             <h4 className="text-sm font-bold text-white mb-3">📊 Real-World Effect</h4>
             <div className="space-y-2 text-xs text-slate-300">
-              {selectedProduct === 0 && (
-                <>
-                  <p>🍎 <strong>iPhone 15:</strong> Costs $799 in USA (₹67k) but ₹89,999 in India.</p>
-                  <p>📈 <strong>Import duty</strong> + GST makes it ₹22,999 MORE expensive in India.</p>
-                  <p>🇮🇳 <strong>Indian alternative:</strong> OnePlus & Realme price competitively to benefit.</p>
-                </>
-              )}
-              {selectedProject === 1 && (
-                <>
-                  <p>💻 <strong>MacBook Air:</strong> $1,099 in USA (₹92k) but ₹1,14,900 in India.</p>
-                  <p>📈 <strong>Duty</strong> makes it ₹22k more expensive.</p>
-                  <p>🇮🇳 <strong>Effect:</strong> Many students buy refurbished/second-hand to avoid cost.</p>
-                </>
-              )}
-              {selectedProduct === 2 && (
-                <>
-                  <p>⛽ <strong>Petrol prices:</strong> Change daily based on crude oil import costs.</p>
-                  <p>📈 <strong>Duty & taxes</strong> add ₹25+ per liter.</p>
-                  <p>🚗 <strong>Effect:</strong> CNG cars become attractive. EV adoption increases.</p>
-                </>
-              )}
-              {selectedProduct === 3 && (
-                <>
-                  <p>🧺 <strong>Washing Machines:</strong> Samsung pays duty, raises India prices 20%.</p>
-                  <p>📈 <strong>Local brand Godrej</strong> can price lower → gains market share.</p>
-                  <p>🏭 <strong>Effect:</strong> Local manufacturing encouraged, jobs created.</p>
-                </>
-              )}
-              {selectedProduct === 4 && (
-                <>
-                  <p>🔌 <strong>Chip shortage:</strong> Duty increases cost of chips in all electronics.</p>
-                  <p>📈 <strong>Cascading effect:</strong> Phone cost ↑, laptop cost ↑, car cost ↑</p>
-                  <p>🇮🇳 <strong>Government goal:</strong> Build domestic semiconductor plants (India Chip Mission)</p>
-                </>
-              )}
-              {selectedProduct === 5 && (
-                <>
-                  <p>🌾 <strong>Wheat import:</strong> 40% duty keeps it expensive → domestic supply preferred</p>
-                  <p>📈 <strong>Protects Indian farmers</strong> from global price swings</p>
-                  <p>🍞 <strong>Effect:</strong> Bread prices remain stable, farmers get fair price</p>
-                </>
-              )}
+              {/* ✅ FIXED: Now maps over the array inside the product object directly */}
+              {current.realWorld.map((line, i) => (
+                <p key={i} dangerouslySetInnerHTML={{ __html: line.replace(/(\*\*(.*?)\*\*)/g, '<strong>$2</strong>') }} />
+              ))}
             </div>
           </div>
         </div>

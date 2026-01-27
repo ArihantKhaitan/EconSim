@@ -9,7 +9,10 @@ import IncomeTaxCalc from './modules/IncomeTax';
 import GSTModule from './modules/GSTCalculator';       
 import PolicySimulator from './modules/PolicySimulator';
 import InflationModule from './modules/InflationModule';
-import LearnModule from './modules/LearnHub';          
+import LearnModule from './modules/LearnHub';
+import SubsidyCalculator from './modules/SubsidyCalculator';
+import ImportDutyCalculator from './modules/ImportDutyCalculator';
+import SMEScenarios from './modules/SMEScenarios';
 
 // Tax Logic Helpers
 const calculateTax = (income) => {
@@ -46,7 +49,7 @@ const initialExpenses = [
   { id: 4, name: 'Zomato / Swiggy', amount: 3500, category: 'food', gst: 5 },
   { id: 5, name: 'Electricity Bill', amount: 1500, category: 'utilities', gst: 0 },
   { id: 6, name: 'Mobile & WiFi', amount: 1200, category: 'utilities', gst: 18 },
-  { id: 7, name: 'Fuel (Petrol/Diesel)', amount: 4000, category: 'transport', gst: 0 }, // VAT applies, simulated as 0 GST
+  { id: 7, name: 'Fuel (Petrol/Diesel)', amount: 4000, category: 'transport', gst: 0 },
   { id: 8, name: 'Uber / Ola', amount: 2000, category: 'transport', gst: 5 },
   { id: 9, name: 'Shopping (Clothes)', amount: 3000, category: 'shopping', gst: 12 },
   { id: 10, name: 'Electronics/Gadgets', amount: 2000, category: 'electronics', gst: 18 },
@@ -117,6 +120,12 @@ function App() {
         return <PolicySimulator taxInputs={taxInputs} gstImpact={gstResult} newRegimeTax={taxResult.newRegime} />;
       case 'inflation':
         return <InflationModule gstImpact={gstResult} />;
+      case 'subsidies':
+        return <SubsidyCalculator />;
+      case 'import-duty':
+        return <ImportDutyCalculator />;
+      case 'sme-scenarios':
+        return <SMEScenarios />;
       case 'learn':
         return <LearnModule />;
       default:
@@ -146,19 +155,22 @@ function App() {
            </div>
            
            {/* Tabs */}
-           <nav className="hidden md:flex gap-1 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50">
+           <nav className="hidden md:flex gap-1 bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 overflow-x-auto">
               {[
                 { name: 'Dashboard', id: 'dashboard' },
                 { name: 'Income Tax', id: 'income-tax' },
                 { name: 'GST', id: 'gst' },
                 { name: 'Policy Sim', id: 'policy-sim' },
                 { name: 'Inflation', id: 'inflation' },
+                { name: 'Subsidies', id: 'subsidies' },
+                { name: 'Import Duty', id: 'import-duty' },
+                { name: 'SME', id: 'sme-scenarios' },
                 { name: 'Learn', id: 'learn' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+                  className={`px-3 py-2 rounded-lg text-xs md:text-sm font-bold transition-all duration-200 whitespace-nowrap ${
                     activeTab === tab.id 
                       ? 'bg-slate-700 text-white shadow-md' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-800'
