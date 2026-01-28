@@ -121,7 +121,7 @@ function App() {
       case 'inflation':
         return <InflationModule gstImpact={gstResult} />;
       case 'subsidies':
-        return <SubsidyCalculator />;
+        return <SubsidyCalculator userIncome={taxInputs.grossIncome} />;
       case 'import-duty':
         return <ImportDutyCalculator />;
       case 'sme-scenarios':

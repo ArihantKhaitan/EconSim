@@ -1,3 +1,4 @@
+// client/src/modules/SMEScenarios.jsx
 import React, { useState } from 'react';
 
 const formatCurrency = (amount) => {
@@ -8,30 +9,34 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+// ✅ FIXED: Cleaner Card UI (No Description, No Footer, Better Title)
 const ScenarioCard = ({ scenario, isSelected, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`p-6 rounded-2xl border-2 text-left transition-all transform hover:scale-105 h-full ${
+      className={`p-4 rounded-2xl border-2 text-left transition-all transform hover:scale-[1.02] flex flex-col gap-3 ${
         isSelected
           ? 'bg-gradient-to-br from-violet-900/40 to-indigo-900/30 border-violet-500 ring-2 ring-violet-500/30'
           : 'bg-slate-800 border-slate-700 hover:border-violet-500/50'
       }`}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="text-5xl mb-3">{scenario.emoji}</div>
-          <h3 className="font-bold text-white text-lg">{scenario.title}</h3>
-          <p className="text-xs text-slate-400 mt-1">{scenario.owner}</p>
-        </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-400 uppercase font-bold mb-1">Business Type</div>
-          <div className={`text-sm font-black ${isSelected ? 'text-violet-400' : 'text-slate-300'}`}>
-            {scenario.type}
-          </div>
-        </div>
+      {/* Top Row: Emoji & Badge */}
+      <div className="flex justify-between items-center w-full">
+        <div className="text-4xl">{scenario.emoji}</div>
+        <span className={`text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wider ${
+            isSelected ? 'bg-violet-500/20 text-violet-300' : 'bg-slate-700 text-slate-400'
+        }`}>
+          {scenario.type}
+        </span>
       </div>
-      <p className="text-sm text-slate-300 line-clamp-3">{scenario.description}</p>
+
+      {/* Middle: Title & Owner (Full Width now) */}
+      <div>
+        <h3 className="font-bold text-white text-lg leading-tight">
+          {scenario.title}
+        </h3>
+        <p className="text-xs text-slate-400 mt-1">{scenario.owner}</p>
+      </div>
     </button>
   );
 };
@@ -460,89 +465,69 @@ export default function SMEScenarios() {
         {!showDecision ? (
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">🤔 What Would You Do?</h3>
-            <p className="text-slate-300 mb-6">Click the button below to see 3 real decisions this owner is considering...</p>
+            <p className="text-slate-300 mb-6">Click below to reveal the 3 difficult choices facing this business owner...</p>
             <button
               onClick={() => setShowDecision(true)}
-              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg"
+              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-violet-900/20"
             >
-              Show Decision Options
+              Reveal Options
             </button>
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white">Decision Options</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Make Your Decision</h3>
             
-            {/* Option A */}
-            <div
-              onClick={() => setUserChoice('A')}
-              className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${
-                userChoice === 'A'
-                  ? 'bg-emerald-900/30 border-emerald-500 ring-2 ring-emerald-500/30'
-                  : 'bg-slate-800 border-slate-700 hover:border-emerald-500'
-              }`}
-            >
-              <h4 className="text-lg font-bold text-white mb-3">{decisionA.option}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                {Object.entries(decisionA.details).slice(0, 4).map(([key, value]) => {
-                  if (typeof value === 'object' || typeof value === 'string') return null;
-                  return (
-                    <div key={key} className="bg-slate-900/50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-400 capitalize font-bold mb-1">{key}</p>
-                      <p className="font-bold text-white">₹{typeof value === 'number' && value > 100 ? (value / 1000).toFixed(1) + 'k' : value}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-sm text-slate-300">{decisionA.details.impact}</p>
-            </div>
+            {/* Render A, B, C Options Dynamically */}
+            {[decisionA, decisionB, decisionC].map((decision, idx) => {
+                const letter = ['A', 'B', 'C'][idx];
+                const isActive = userChoice === letter;
+                
+                // Styling logic for active state
+                let activeClass = 'bg-slate-800 border-slate-700 hover:border-slate-500';
+                if (isActive) {
+                    if (letter === 'A') activeClass = 'bg-emerald-900/20 border-emerald-500 ring-1 ring-emerald-500/50';
+                    if (letter === 'B') activeClass = 'bg-blue-900/20 border-blue-500 ring-1 ring-blue-500/50';
+                    if (letter === 'C') activeClass = 'bg-purple-900/20 border-purple-500 ring-1 ring-purple-500/50';
+                }
 
-            {/* Option B */}
-            <div
-              onClick={() => setUserChoice('B')}
-              className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${
-                userChoice === 'B'
-                  ? 'bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/30'
-                  : 'bg-slate-800 border-slate-700 hover:border-blue-500'
-              }`}
-            >
-              <h4 className="text-lg font-bold text-white mb-3">{decisionB.option}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                {Object.entries(decisionB.details).slice(0, 4).map(([key, value]) => {
-                  if (typeof value === 'object' || typeof value === 'string') return null;
-                  return (
-                    <div key={key} className="bg-slate-900/50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-400 capitalize font-bold mb-1">{key}</p>
-                      <p className="font-bold text-white">₹{typeof value === 'number' && value > 100 ? (value / 1000).toFixed(1) + 'k' : value}</p>
+                return (
+                    <div
+                      key={letter}
+                      onClick={() => setUserChoice(letter)}
+                      className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${activeClass}`}
+                    >
+                      <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm">{letter}</span>
+                        {decision.option.split(':')[1] || decision.option} 
+                      </h4>
+                      
+                      {/* Financial Impact Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        {Object.entries(decision.details).slice(0, 4).map(([key, value]) => {
+                          if (typeof value === 'object' || typeof value === 'string') return null;
+                          return (
+                            <div key={key} className="bg-slate-950/50 p-3 rounded-lg border border-slate-800/50 overflow-hidden">
+                              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 truncate" title={key}>
+                                {key.replace(/([A-Z])/g, ' $1')}
+                              </p>
+                              <p className="font-mono text-sm md:text-base font-bold text-white truncate">
+                                {typeof value === 'number' ? formatCurrency(value) : value}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Text Impact */}
+                      <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                         <p className="text-sm text-slate-300 leading-relaxed break-words">
+                            <span className="text-violet-400 font-bold">Impact: </span> 
+                            {decision.details.impact}
+                         </p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-              <p className="text-sm text-slate-300">{decisionB.details.impact}</p>
-            </div>
-
-            {/* Option C */}
-            <div
-              onClick={() => setUserChoice('C')}
-              className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${
-                userChoice === 'C'
-                  ? 'bg-purple-900/30 border-purple-500 ring-2 ring-purple-500/30'
-                  : 'bg-slate-800 border-slate-700 hover:border-purple-500'
-              }`}
-            >
-              <h4 className="text-lg font-bold text-white mb-3">{decisionC.option}</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                {Object.entries(decisionC.details).slice(0, 4).map(([key, value]) => {
-                  if (typeof value === 'object' || typeof value === 'string') return null;
-                  return (
-                    <div key={key} className="bg-slate-900/50 p-3 rounded-lg">
-                      <p className="text-xs text-slate-400 capitalize font-bold mb-1">{key}</p>
-                      <p className="font-bold text-white">₹{typeof value === 'number' && value > 100 ? (value / 1000).toFixed(1) + 'k' : value}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-sm text-slate-300">{decisionC.details.impact}</p>
-            </div>
+                );
+            })}
           </div>
         )}
 

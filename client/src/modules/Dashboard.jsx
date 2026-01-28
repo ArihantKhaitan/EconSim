@@ -7,6 +7,7 @@ import ShareResults from '../components/ShareResults';
 import PDFReport from '../components/PDFReport';
 import HistoricalComparison from '../components/HistoricalComparison';
 import AIExplainer from '../components/AIExplainer';
+import { useState, useEffect } from 'react'; // Add useEffect and useState
 
 // Helper to format currency
 const formatCurrency = (amount) => {
@@ -17,10 +18,63 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-// --- COMPONENT: FULL-WIDTH ROTATING TICKER ---
+// --- COMPONENT: FULL-WIDTH ROTATING TICKER (Slower & Pauses on Hover) ---
 const NewsTicker = () => {
+  const [newsItems, setNewsItems] = useState([
+    "🔴 Fetching Global Market Updates...",
+    "📊 Tracking Sensex, Nifty & Gold Rates...",
+    "🌍 Loading Business & Tech Headlines..."
+  ]);
+
+  useEffect(() => {
+    const fetchAllNews = async () => {
+      const feeds = [
+        'https://timesofindia.indiatimes.com/rssfeeds/1898055.cms',   // Business
+        'https://timesofindia.indiatimes.com/rssfeeds/66949542.cms',  // Tech
+        'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms'  // India Top Stories
+      ];
+
+      try {
+        const promises = feeds.map(url => 
+          fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`)
+            .then(res => res.json())
+        );
+
+        const results = await Promise.all(promises);
+        
+        let allHeadlines = [];
+        results.forEach(data => {
+          if (data.status === 'ok') {
+            const titles = data.items.map(item => {
+                let prefix = "📰";
+                if (data.feed.title.includes("Business")) prefix = "📉";
+                if (data.feed.title.includes("Tech")) prefix = "💻";
+                return `${prefix} ${item.title}`;
+            });
+            allHeadlines = [...allHeadlines, ...titles];
+          }
+        });
+
+        const uniqueHeadlines = [...new Set(allHeadlines)];
+        
+        if (uniqueHeadlines.length > 0) {
+            setNewsItems(uniqueHeadlines);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch news:", error);
+        setNewsItems([
+            "⚠️ Live News Unavailable (Check Internet)", 
+            "📈 Market Data Delayed"
+        ]);
+      }
+    };
+
+    fetchAllNews();
+  }, []);
+
   return (
-    <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-8 mb-8 bg-slate-900 border-b border-slate-800 overflow-hidden h-10 flex items-center z-0">
+    <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] -mt-8 mb-8 bg-slate-900 border-b border-slate-800 overflow-hidden h-10 flex items-center z-0 group">
       
       {/* Red 'LIVE' Badge */}
       <div className="absolute left-0 top-0 bottom-0 bg-red-600 px-4 z-20 flex items-center text-xs font-bold text-white uppercase tracking-wider shadow-[4px_0_12px_rgba(0,0,0,0.5)]">
@@ -28,22 +82,24 @@ const NewsTicker = () => {
       </div>
 
       {/* Rotating Content */}
-      <div className="flex animate-marquee whitespace-nowrap items-center">
+      {/* Added style={{ animationDuration: '80s' }} to make it much slower */}
+      <div 
+        className="flex animate-marquee whitespace-nowrap items-center group-hover:pause"
+        style={{ animationDuration: '80s' }} 
+      >
         <div className="flex items-center gap-12 text-sm font-medium text-slate-300 px-4 pl-24">
-            <span>📉 <strong className="text-white">Crude Oil</strong> drops to $71/barrel</span>
-            <span>📢 <strong className="text-white">RBI</strong> likely to hold Repo Rate at 6.5%</span>
-            <span>🍅 <strong className="text-white">Tomato Prices</strong> surge 14% in Delhi</span>
-            <span>⚡ <strong className="text-white">Govt</strong> announces ₹500cr EV subsidy</span>
-            <span>📈 <strong className="text-white">Sensex</strong> crosses 78,000 mark</span>
-            <span>🏗️ <strong className="text-white">Infrastructure Cess</strong> likely to increase</span>
+            {newsItems.map((item, index) => (
+              <span key={index} className="flex items-center gap-2">
+                 <strong className="text-white">{item}</strong>
+              </span>
+            ))}
             
-            {/* DUPLICATE CONTENT FOR SEAMLESS LOOP */}
-            <span>📉 <strong className="text-white">Crude Oil</strong> drops to $71/barrel</span>
-            <span>📢 <strong className="text-white">RBI</strong> likely to hold Repo Rate at 6.5%</span>
-            <span>🍅 <strong className="text-white">Tomato Prices</strong> surge 14% in Delhi</span>
-            <span>⚡ <strong className="text-white">Govt</strong> announces ₹500cr EV subsidy</span>
-            <span>📈 <strong className="text-white">Sensex</strong> crosses 78,000 mark</span>
-            <span>🏗️ <strong className="text-white">Infrastructure Cess</strong> likely to increase</span>
+            {/* Duplicate for seamless loop */}
+            {newsItems.map((item, index) => (
+              <span key={`dup-${index}`} className="flex items-center gap-2">
+                 <strong className="text-white">{item}</strong>
+              </span>
+            ))}
         </div>
       </div>
     </div>

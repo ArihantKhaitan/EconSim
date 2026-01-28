@@ -4,18 +4,18 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 // --- 1. EXPANDED DATASET (Simulating 1 Year) ---
 const FULL_MACRO_DATA = [
-  { month: 'Jan', cpi: 5.1, core: 3.5, superCore: 2.1, wpi: 4.2, ppi: 3.8 },
-  { month: 'Feb', cpi: 5.0, core: 3.4, superCore: 2.0, wpi: 4.1, ppi: 3.7 },
-  { month: 'Mar', cpi: 4.8, core: 3.2, superCore: 1.9, wpi: 3.9, ppi: 3.5 },
-  { month: 'Apr', cpi: 4.7, core: 3.1, superCore: 1.8, wpi: 3.8, ppi: 3.4 },
-  { month: 'May', cpi: 4.8, core: 3.0, superCore: 1.8, wpi: 4.0, ppi: 3.6 },
-  { month: 'Jun', cpi: 5.0, core: 3.1, superCore: 1.9, wpi: 4.3, ppi: 3.9 },
-  { month: 'Jul', cpi: 3.5, core: 2.0, superCore: 1.2, wpi: 2.1, ppi: 1.8 },
-  { month: 'Aug', cpi: 3.7, core: 2.2, superCore: 1.1, wpi: 2.3, ppi: 2.0 },
-  { month: 'Sep', cpi: 3.2, core: 1.9, superCore: 0.9, wpi: 1.8, ppi: 1.5 },
-  { month: 'Oct', cpi: 2.6, core: 1.8, superCore: 0.2, wpi: 1.2, ppi: 0.9 },
-  { month: 'Nov', cpi: 4.4, core: 2.4, superCore: 0.7, wpi: 3.1, ppi: 2.8 },
-  { month: 'Dec', cpi: 5.2, core: 2.8, superCore: 1.0, wpi: 4.5, ppi: 4.1 },
+  { month: 'Jan', cpi: 5.1, core: 3.5, superCore: 2.1, wpi: 4.2, ppi: 3.8, personalWithCard: 3.2, personalWithoutCard: 5.8 },
+  { month: 'Feb', cpi: 5.0, core: 3.4, superCore: 2.0, wpi: 4.1, ppi: 3.7, personalWithCard: 3.1, personalWithoutCard: 5.7 },
+  { month: 'Mar', cpi: 4.8, core: 3.2, superCore: 1.9, wpi: 3.9, ppi: 3.5, personalWithCard: 3.0, personalWithoutCard: 5.5 },
+  { month: 'Apr', cpi: 4.7, core: 3.1, superCore: 1.8, wpi: 3.8, ppi: 3.4, personalWithCard: 2.9, personalWithoutCard: 5.4 },
+  { month: 'May', cpi: 4.8, core: 3.0, superCore: 1.8, wpi: 4.0, ppi: 3.6, personalWithCard: 3.0, personalWithoutCard: 5.5 },
+  { month: 'Jun', cpi: 5.0, core: 3.1, superCore: 1.9, wpi: 4.3, ppi: 3.9, personalWithCard: 3.2, personalWithoutCard: 5.8 },
+  { month: 'Jul', cpi: 3.5, core: 2.0, superCore: 1.2, wpi: 2.1, ppi: 1.8, personalWithCard: 1.8, personalWithoutCard: 3.8 },
+  { month: 'Aug', cpi: 3.7, core: 2.2, superCore: 1.1, wpi: 2.3, ppi: 2.0, personalWithCard: 2.0, personalWithoutCard: 4.0 },
+  { month: 'Sep', cpi: 3.2, core: 1.9, superCore: 0.9, wpi: 1.8, ppi: 1.5, personalWithCard: 1.5, personalWithoutCard: 3.5 },
+  { month: 'Oct', cpi: 2.6, core: 1.8, superCore: 0.2, wpi: 1.2, ppi: 0.9, personalWithCard: 1.0, personalWithoutCard: 3.0 },
+  { month: 'Nov', cpi: 4.4, core: 2.4, superCore: 0.7, wpi: 3.1, ppi: 2.8, personalWithCard: 2.8, personalWithoutCard: 4.8 },
+  { month: 'Dec', cpi: 5.2, core: 2.8, superCore: 1.0, wpi: 4.5, ppi: 4.1, personalWithCard: 3.5, personalWithoutCard: 5.5 },
 ];
 
 const InflationCard = ({ title, value, description, color }) => {
