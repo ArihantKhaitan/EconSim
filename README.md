@@ -1,6 +1,3 @@
-Here is the fully updated **README.md** file. It includes all the new advanced modules (SME Scenarios, Import Duty, Subsidies) and explicit instructions for setting up the local AI with Ollama.
-
-```markdown
 # 🏛️ EconSim - Intelligent Policy & Inflation Simulator
 > **FinHack 2025 Submission | Team 67 | Track: FinTech for Social Impact (PS-5)**
 
