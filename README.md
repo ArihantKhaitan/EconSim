@@ -13,14 +13,14 @@ Government policies (Budget revisions, GST changes, Subsidies, Import Duties) si
 
 ---
 
-## 💡 Our Solution: EconSim
+## 💡 Solution: EconSim
 EconSim is a **comprehensive microsimulation platform** that translates complex economic data into personalized financial insights.
 
 Unlike static calculators, EconSim features a **Hybrid AI Engine** (Cloud + Local) acting as a real-time financial advisor. It models not just taxes, but also **inflation shocks**, **social protection schemes**, **import duties**, and **business trade-offs**, making it a truly inclusive tool for everyone from farmers to startup owners.
 
 ---
 
-### 🌟 Key Features (The Winning Edge)
+### 🌟 Key Features
 
 #### 1. 🎙️ Voice-Enabled AI Advisor (Hinglish Support)
 * **Talk to Your Data:** Ask questions like *"Mera tax kaise bachega?"* (How can I save tax?) via microphone.
@@ -143,7 +143,7 @@ npm install
 
 3. Run the development server:
 ```bash
-npm run dev
+npx vite --port 5173 --host
 
 ```
 
@@ -159,20 +159,3 @@ npm run dev
 * **Protection Logic:** Explicitly models safety nets (Ration Cards, Subsidies) to demonstrate how policy protects the bottom 20% of the economy.
 
 ---
-
-## 💰 Business Model
-
-| Tier | Target Audience | Pricing | Features |
-| --- | --- | --- | --- |
-| **Freemium** | Students, General Public | **₹0** | Basic Calc, 3 AI Queries/Day |
-| **Premium** | Investors, Taxpayers | **₹99/mo** | PDF Reports, Unlimited AI, History |
-| **GovTech** | Government Portals | **Licensing** | White-label Budget Explainer Tool |
-| **API** | FinTech Apps | **Per Call** | "Personal Inflation Engine" API |
-
----
-
-**Built with ❤️ for FinHack 2025**
-
-```
-
-```
